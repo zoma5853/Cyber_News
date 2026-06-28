@@ -1,0 +1,27 @@
+# Render deployment blueprint.
+# This runs the bot as a "Background Worker" (always-on, no web port needed).
+#
+# How to use:
+# 1. Push this folder to a GitHub repo.
+# 2. On render.com -> New + -> Blueprint -> connect the repo.
+# 3. Render reads this file and creates the worker.
+# 4. Add your BOT_TOKEN (and optionally DIGEST_CHAT_IDS) in the Environment tab.
+
+services:
+  - type: worker
+    name: cyber-news-bot
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python bot.py"
+    envVars:
+      - key: BOT_TOKEN
+        sync: false          # set this securely in the dashboard
+      - key: DIGEST_CHAT_IDS
+        sync: false
+      - key: DIGEST_HOUR
+        value: "9"
+      - key: DIGEST_MINUTE
+        value: "0"
+      - key: TOP_N
+        value: "8"
