@@ -12,6 +12,8 @@ import os
 import re
 import html
 import logging
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -84,6 +86,28 @@ IMPORTANCE_KEYWORDS = {
 # In-memory cache of the latest digest so users can request summaries.
 # Maps chat_id -> list of story dicts (so each user gets their own context).
 LATEST_DIGEST = {}
+
+
+# --------------------------------------------------------------------------- #
+# Health server (keeps Render Web Service alive — never times out)
+# --------------------------------------------------------------------------- #
+
+class _HealthHandler(BaseHTTPRequestHandler):
+    """Tiny HTTP handler that always returns 200 OK."""
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"OK")
+
+    def log_message(self, format, *args):
+        pass  # silence access logs
+
+
+def _run_health_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), _HealthHandler)
+    logger.info("Health server listening on port %d", port)
+    server.serve_forever()
 
 
 # --------------------------------------------------------------------------- #
@@ -358,6 +382,10 @@ async def send_daily_digest(context: ContextTypes.DEFAULT_TYPE):
 # --------------------------------------------------------------------------- #
 
 def main():
+    # Start the health server in a background thread so Render
+    # sees an open port and never marks the service as timed out.
+    threading.Thread(target=_run_health_server, daemon=True).start()
+
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", cmd_start))
