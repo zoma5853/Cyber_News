@@ -198,7 +198,7 @@ def _summary_keyboard(idx: int, total: int) -> InlineKeyboardMarkup:
     nav = []
     if idx > 0:
         nav.append(InlineKeyboardButton("◀️ Prev", callback_data=f"s|{idx - 1}"))
-    nav.append(InlineKeyboardButton("⬅️ All stories", callback_data="b"))
+    nav.append(InlineKeyboardButton("🔃 All stories", callback_data="b"))
     if idx < total - 1:
         nav.append(InlineKeyboardButton("Next ▶️", callback_data=f"s|{idx + 1}"))
     return InlineKeyboardMarkup([nav])
