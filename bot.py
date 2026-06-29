@@ -182,7 +182,7 @@ def build_summary_ui(story):
         f"{html.escape(summary)}"
     )
     
-    kb = [[InlineKeyboardButton("⬅️ Back to Digest", callback_data="c|digest|0")]]
+    kb = [[InlineKeyboardButton("⬅️ Back", callback_data="c|digest|0")]]
     if story.get("link"):
         kb.insert(0, [InlineKeyboardButton("🔗 Read full article", url=story["link"])])
         
